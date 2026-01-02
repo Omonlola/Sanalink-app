@@ -77,8 +77,12 @@ export function Dashboard() {
             <section className="mb-12">
                 <Card className="flex flex-col md:flex-row justify-between items-center gap-6 bg-gradient-to-r from-brand-50 to-white">
                     <div className="flex items-center gap-4">
-                        <div className="bg-white p-4 rounded-full shadow-sm">
-                            <User className="w-8 h-8 text-brand-500" />
+                        <div className="bg-white p-1 rounded-full shadow-sm overflow-hidden w-16 h-16 flex items-center justify-center border-2 border-white">
+                            {user.image ? (
+                                <img src={user.image} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                            ) : (
+                                <User className="w-8 h-8 text-brand-500" />
+                            )}
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-slate-900">Mon Profil</h2>
@@ -148,7 +152,13 @@ export function Dashboard() {
                             {psychologists.map(psy => (
                                 <Card key={psy.id} className="flex flex-col h-full hover:border-brand-300 transition-colors">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <img src={psy.image} alt={psy.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
+                                        {psy.image ? (
+                                            <img src={psy.image} alt={psy.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-md">
+                                                <User className="w-8 h-8 text-slate-400" />
+                                            </div>
+                                        )}
                                         <div>
                                             <h3 className="font-bold text-slate-900">{psy.name}</h3>
                                             <p className="text-sm text-brand-600 font-medium">{psy.specialty}</p>

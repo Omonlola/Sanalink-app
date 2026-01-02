@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/Card';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import { User, Camera } from 'lucide-react';
 
 export function Profile() {
     const { user, updateProfile } = useAuth();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
+    const fileInputRef = useRef(null);
 
     // Common State
     const [name, setName] = useState(user.name || '');
     const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
+    const [image, setImage] = useState(user.image || '');
 
     // Patient State
     const [age, setAge] = useState(user.age || '');
@@ -24,12 +27,23 @@ export function Profile() {
     const [specialty, setSpecialty] = useState(user.specialty || '');
     const [consultationFee, setConsultationFee] = useState(user.consultationFee || '');
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setSuccess('');
         try {
-            const updates = { name, phoneNumber };
+            const updates = { name, phoneNumber, image };
             if (user.type === 'user') {
                 Object.assign(updates, { age, profession, reason, emotionalState });
             } else {
@@ -57,6 +71,38 @@ export function Profile() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Profile Picture Section */}
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="relative w-32 h-32 mb-4 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                            <div className="w-full h-full rounded-full overflow-hidden border-4 border-slate-100 shadow-sm relative text-slate-300 bg-slate-100">
+                                {image ? (
+                                    <img src={image} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                                        <User size={64} className="text-slate-300" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Camera className="text-white" size={24} />
+                            </div>
+                        </div>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageUpload}
+                            accept="image/*"
+                            className="hidden"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                            Changer la photo
+                        </button>
+                    </div>
+
                     <Input
                         label="Nom complet"
                         value={name}

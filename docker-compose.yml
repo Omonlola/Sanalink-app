@@ -5,6 +5,16 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/sanalink
+    depends_on:
+      - mongo
+    networks:
+      - sanalink-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
     networks:
       - sanalink-network
 
