@@ -1,0 +1,22 @@
+services:
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    networks:
+      - sanalink-network
+
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - sanalink-network
+
+networks:
+  sanalink-network:
+    driver: bridge
