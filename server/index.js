@@ -199,10 +199,12 @@ app.post('/api/appointments', async (req, res) => {
     try {
         const { userId, doctorId, date, time, type } = req.body;
 
-        // Mock generation of meet link
+        // Generate meet link with doctor's email
         let link = null;
         if (type === 'remote') {
-            link = `https://meet.google.com/new-meeting?authuser=agnesvdogo@gmail.com`;
+            const doctor = await findDoctor(doctorId);
+            const doctorEmail = doctor?.email || 'agnesvdogo@gmail.com';
+            link = `https://meet.google.com/new-meeting?authuser=${doctorEmail}`;
         }
 
         const newAppointment = await Appointment.create({
