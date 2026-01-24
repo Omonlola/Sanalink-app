@@ -6,6 +6,7 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Profile } from './pages/Profile';
+import { Journal } from './pages/Journal';
 
 function PrivateRoute({ children }) {
     const { user } = useAuth();
@@ -35,6 +36,14 @@ function App() {
                             element={
                                 <PrivateRoute>
                                     <Profile />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/journal"
+                            element={
+                                <PrivateRoute>
+                                    <Journal />
                                 </PrivateRoute>
                             }
                         />
