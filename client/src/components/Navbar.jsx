@@ -39,9 +39,6 @@ export function Navbar() {
                                 <Link to="/profile">
                                     <Button variant="ghost" className="py-1.5 text-sm">Mon Profil</Button>
                                 </Link>
-                                <Link to="/journal">
-                                    <Button variant="ghost" className="py-1.5 text-sm">Journal</Button>
-                                </Link>
                                 <Button variant="ghost" onClick={handleLogout} className="py-1.5 text-sm">Déconnexion</Button>
                             </div>
                         ) : (

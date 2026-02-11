@@ -1,65 +1,23 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-const connectDB = require('./db');
-
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 
-// Connect to Database
-connectDB();
+// --- In-Memory Database ---
+const users = []; // { id, email, password, name, type: 'user' | 'psychologist' }
+const appointments = []; // { id, userId, doctorId, date, time, type, status, link }
+const evaluations = []; // { id, userId, doctorId, content, date }
 
-// --- Mongoose Models ---
-const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    name: { type: String, required: true },
-    type: { type: String, enum: ['user', 'psychologist'], default: 'user' },
-    // Profile fields
-    age: String,
-    profession: String,
-    reason: String,
-    emotionalState: String,
-    // Psychologist fields
-    specialty: String,
-    description: String,
-    consultationFee: String,
-    image: String,
-    availableSlots: [String]
-});
-
-const appointmentSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    doctorId: String, // Can be ID from DB or static ID from mocks
-    date: String,
-    time: String,
-    type: String,
-    status: { type: String, default: 'pending' },
-    link: String
-});
-
-const evaluationSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    doctorId: String,
-    content: String,
-    date: { type: Date, default: Date.now }
-});
-
-const User = mongoose.model('User', userSchema);
-const Appointment = mongoose.model('Appointment', appointmentSchema);
-const Evaluation = mongoose.model('Evaluation', evaluationSchema);
-
-// --- Mock Psychologists (Static Data) ---
-const mockPsychologists = [
+// Mock Psychologists
+const psychologists = [
     {
         id: 'psy-1',
         name: 'Dr. Jean Dupont',
         specialty: 'Psychologie Clinique',
         description: 'Expert en gestion du stress et anxiété. 15 ans d\'expérience.',
-        consultationFee: '5000',
         image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200',
         availableSlots: ['09:00', '10:00', '14:00', '15:00'],
         email: 'jean.dupont@sanalink.com'
@@ -69,7 +27,6 @@ const mockPsychologists = [
         name: 'Mme. Sarah Cohen',
         specialty: 'Thérapie de couple',
         description: 'Accompagnement bienveillant pour les couples et les familles.',
-        consultationFee: '7000',
         image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200',
         availableSlots: ['11:00', '13:00', '16:00'],
         email: 'sarah.cohen@sanalink.com'
@@ -79,219 +36,174 @@ const mockPsychologists = [
         name: 'Dr. Marc Levy',
         specialty: 'Pédopsychiatrie',
         description: 'Spécialisé dans les troubles de l\'attention chez l\'enfant.',
-        consultationFee: '6000',
         image: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200',
         availableSlots: ['08:00', '12:00', '17:00'],
         email: 'marc.levy@sanalink.com'
     }
 ];
 
-// --- Helpers ---
-// Try to find doctor in DB or Mocks
-const findDoctor = async (id) => {
-    // Check mocks first (they have string IDs like 'psy-1')
-    const mock = mockPsychologists.find(p => p.id === id);
-    if (mock) return mock;
-
-    // Check DB
-    if (mongoose.Types.ObjectId.isValid(id)) {
-        return await User.findById(id);
-    }
-    return null;
-};
+// Helper to find user
+const findUser = (email) => users.find(u => u.email === email) || psychologists.find(p => p.email === email);
 
 // --- Auth Routes ---
-app.post('/api/auth/register', async (req, res) => {
-    try {
-        const { email, password, name, type } = req.body;
-
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-
-        const newUser = await User.create({
-            email,
-            password,
-            name,
-            type,
-            // Default fields for psychs
-            specialty: type === 'psychologist' ? 'Psychologue inscrit' : undefined,
-            description: type === 'psychologist' ? 'Nouveau professionnel.' : undefined,
-            availableSlots: type === 'psychologist' ? ['09:00', '14:00'] : undefined
-        });
-
-        const userObj = newUser.toObject();
-        delete userObj.password;
-
-        res.status(201).json({ ...userObj, id: userObj._id });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+app.post('/api/auth/register', (req, res) => {
+    const { email, password, name, type } = req.body;
+    if (findUser(email)) {
+        return res.status(400).json({ message: 'User already exists' });
     }
+    const newUser = { id: Date.now().toString(), email, password, name, type };
+    users.push(newUser);
+    // In a real app, do not send password back
+    const { password: _, ...userWithoutPass } = newUser;
+    res.status(201).json(userWithoutPass);
 });
 
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
 
-        // Check DB Users
-        const user = await User.findOne({ email });
-        if (user && user.password === password) {
-            const userObj = user.toObject();
-            delete userObj.password;
-            return res.json({ ...userObj, id: userObj._id });
+    // Check normal users
+    let user = users.find(u => u.email === email && u.password === password);
+
+    // Check mock psychologists (password is 'password' for demo if not in users array yet? Actually let's just use the users array for auth, 
+    // but for the demo, let's allow "logging in" as a psych if they register or if we use a hardcoded credential)
+    // For simplicity: User MUST register first, even as a psych, OR we can pre-seed credentials.
+    // Let's pre-seed credentials for the mock psychologists so they can log in immediately.
+    if (!user) {
+        // Check if it's one of the mock psychs logging in for the first time?
+        // Let's just say for the demo: password is 'admin' for mock psychs
+        const psych = psychologists.find(p => p.email === email);
+        if (psych && password === 'admin') {
+            user = { ...psych, type: 'psychologist' };
         }
-
-        // Check Mock Psychologists (Backdoor for demo)
-        const mockPsy = mockPsychologists.find(p => p.email === email);
-        if (mockPsy && password === 'admin') {
-            return res.json({ ...mockPsy, type: 'psychologist' });
-        }
-
-        res.status(401).json({ message: 'Invalid credentials' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
     }
+
+    if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const { password: _, ...userWithoutPass } = user;
+    res.json(userWithoutPass);
 });
 
 // Update Profile
-app.put('/api/profile/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updates = req.body;
+app.put('/api/profile/:id', (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
 
-        if (mongoose.Types.ObjectId.isValid(id)) {
-            const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true }).select('-password');
-            if (updatedUser) {
-                return res.json({ ...updatedUser.toObject(), id: updatedUser._id });
-            }
-        }
-
-        // If it's a mock psych, just echo back success (volatile update)
-        if (mockPsychologists.find(p => p.id === id)) {
-            return res.json({ ...updates, id });
-        }
-
-        res.status(404).json({ message: 'User not found' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    // Find in users
+    let userIndex = users.findIndex(u => u.id === id);
+    if (userIndex !== -1) {
+        users[userIndex] = { ...users[userIndex], ...updates };
+        const { password: _, ...userWithoutPass } = users[userIndex];
+        return res.json(userWithoutPass);
     }
+
+    // Find in mock psychologists (for demo purposes if they "claimed" a profile, 
+    // but usually mocks are static. Let's assume we only update the 'users' array 
+    // which contains registered folks. If a mock psych logs in (via the hack earlier), 
+    // they are not in 'users' array unless we move them there. 
+    // For this prototype, I'll check the psychologists array too just in case.)
+
+    // Note: In the previous login logic, I constructed a user object from mock psychs but didn't save it to 'users'.
+    // To allow updates, they ideally should be in a mutable store. 
+    // Let's just return success for now if it's a mock psych but not actually persist changes to the static 'psychologists' const
+    // unless we make it mutable.
+
+    res.json({ ...updates, id }); // Echo back
 });
 
 // --- Data Routes ---
 
-app.get('/api/psychologists', async (req, res) => {
-    try {
-        const dbPsychs = await User.find({ type: 'psychologist' }).select('-password');
-        const formattedDbPsychs = dbPsychs.map(p => ({
-            ...p.toObject(),
-            id: p._id,
-            image: p.image || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'
+app.get('/api/psychologists', (req, res) => {
+    // Registered psychologists
+    const registeredPsychs = users
+        .filter(u => u.type === 'psychologist')
+        .map(u => ({
+            id: u.id,
+            name: u.name,
+            specialty: 'Psychologue inscrit',
+            description: 'Professionnel de santé inscrit sur la plateforme.',
+            image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200', // Default placeholder
+            availableSlots: ['09:00', '11:00', '14:00', '16:00'], // Default slots
+            email: u.email
         }));
 
-        res.json([...mockPsychologists, ...formattedDbPsychs]);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    // Combine with mock psychs
+    res.json([...psychologists, ...registeredPsychs]);
 });
 
-app.post('/api/appointments', async (req, res) => {
-    try {
-        const { userId, doctorId, date, time, type } = req.body;
+app.post('/api/appointments', (req, res) => {
+    const { userId, doctorId, date, time, type } = req.body; // type: 'remote' | 'presentiel'
 
-        // Generate meet link with doctor's email
-        let link = null;
-        if (type === 'remote') {
-            const doctor = await findDoctor(doctorId);
-            const doctorEmail = doctor?.email || 'agnesvdogo@gmail.com';
-            link = `https://meet.google.com/new-meeting?authuser=${doctorEmail}`;
-        }
-
-        const newAppointment = await Appointment.create({
-            userId,
-            doctorId,
-            date,
-            time,
-            type,
-            status: 'pending',
-            link: link || 'Adresse du cabinet du Dr.'
-        });
-
-        res.status(201).json({ ...newAppointment.toObject(), id: newAppointment._id });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    // Mock generation of meet link
+    let link = null;
+    if (type === 'remote') {
+        link = `https://meet.google.com/new-meeting?authuser=agnesvdogo@gmail.com`; // Simulation of what was requested
     }
+
+    const newAppointment = {
+        id: Date.now().toString(),
+        userId,
+        doctorId,
+        date,
+        time,
+        type,
+        status: 'pending',
+        link: link || 'Adresse du cabinet du Dr.'
+    };
+
+    appointments.push(newAppointment);
+    res.status(201).json(newAppointment);
 });
 
-app.get('/api/appointments/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
+app.get('/api/appointments/:userId', (req, res) => {
+    const { userId } = req.params;
+    // Get appointments where user is the patient OR the doctor
+    const userAppointments = appointments.filter(a => a.userId === userId || a.doctorId === userId);
 
-        // Find appointments for this user (as patient) OR as doctor
-        // Mongoose query logic:
-        const conditions = [];
-        if (mongoose.Types.ObjectId.isValid(userId)) {
-            conditions.push({ userId: userId }); // As patient
-        }
-        // As doctor (could be mongoID or string ID like 'psy-1')
-        conditions.push({ doctorId: userId });
+    // Hydrate with details
+    const hydrated = userAppointments.map(a => {
+        const doctor = psychologists.find(p => p.id === a.doctorId);
+        const user = users.find(u => u.id === a.userId);
+        return {
+            ...a,
+            doctorName: doctor ? doctor.name : 'Unknown',
+            userName: user ? user.name : 'Unknown',
+            patientDetails: user ? {
+                age: user.age,
+                profession: user.profession,
+                reason: user.reason,
+                emotionalState: user.emotionalState
+            } : null
+        };
+    });
 
-        const appointments = await Appointment.find({ $or: conditions });
-
-        // Hydrate
-        const hydrated = await Promise.all(appointments.map(async (a) => {
-            const doctor = await findDoctor(a.doctorId);
-
-            let patient = null;
-            if (mongoose.Types.ObjectId.isValid(a.userId)) {
-                patient = await User.findById(a.userId);
-            }
-
-            return {
-                ...a.toObject(),
-                id: a._id,
-                doctorName: doctor ? doctor.name : 'Unknown',
-                userName: patient ? patient.name : 'Unknown',
-                patientDetails: patient ? {
-                    age: patient.age,
-                    profession: patient.profession,
-                    reason: patient.reason,
-                    emotionalState: patient.emotionalState
-                } : null
-            };
-        }));
-
-        res.json(hydrated);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    res.json(hydrated);
 });
 
-app.post('/api/evaluations', async (req, res) => {
-    try {
-        const { userId, doctorId, content } = req.body;
-        const newEval = await Evaluation.create({ userId, doctorId, content });
-        res.status(201).json({ ...newEval.toObject(), id: newEval._id });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+app.post('/api/evaluations', (req, res) => {
+    const { userId, doctorId, content } = req.body;
+    const newEval = {
+        id: Date.now().toString(),
+        userId,
+        doctorId,
+        content,
+        date: new Date().toISOString()
+    };
+    evaluations.push(newEval);
+    res.status(201).json(newEval);
 });
 
-app.get('/api/evaluations/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        if (mongoose.Types.ObjectId.isValid(userId)) {
-            const evals = await Evaluation.find({ userId });
-            return res.json(evals.map(e => ({ ...e.toObject(), id: e._id })));
-        }
-        res.json([]);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+app.get('/api/evaluations/:userId', (req, res) => {
+    const { userId } = req.params;
+    // If requester is user, they see their evals. If psych, they see evals they wrote? 
+    // Ideally psychs see evals of their patients.
+    // For simple demo: just return evals for this user
+    const userEvals = evaluations.filter(e => e.userId === userId);
+    res.json(userEvals);
 });
 
 
 app.listen(port, () => {
     console.log(`Sanalink Server running on port ${port}`);
 });
-
