@@ -10,6 +10,7 @@ app.use(express.json());
 const users = []; // { id, email, password, name, type: 'user' | 'psychologist' }
 const appointments = []; // { id, userId, doctorId, date, time, type, status, link }
 const evaluations = []; // { id, userId, doctorId, content, date }
+const journals = []; // { id, userId, content, date, mood }
 
 // Mock Psychologists
 const psychologists = [
@@ -201,6 +202,41 @@ app.get('/api/evaluations/:userId', (req, res) => {
     // For simple demo: just return evals for this user
     const userEvals = evaluations.filter(e => e.userId === userId);
     res.json(userEvals);
+});
+
+// --- Journal Routes ---
+
+app.get('/api/journals/:userId', (req, res) => {
+    const { userId } = req.params;
+    const userJournals = journals.filter(j => j.userId === userId).sort((a, b) => new Date(b.date) - new Date(a.date));
+    res.json(userJournals);
+});
+
+app.post('/api/journals', (req, res) => {
+    const { userId, content, mood } = req.body;
+    if (!content) {
+        return res.status(400).json({ message: 'Content is required' });
+    }
+    const newEntry = {
+        id: Date.now().toString(),
+        userId,
+        content,
+        mood,
+        date: new Date().toISOString()
+    };
+    journals.push(newEntry);
+    res.status(201).json(newEntry);
+});
+
+app.delete('/api/journals/:id', (req, res) => {
+    const { id } = req.params;
+    const index = journals.findIndex(j => j.id === id);
+    if (index !== -1) {
+        journals.splice(index, 1);
+        res.status(204).send();
+    } else {
+        res.status(404).json({ message: 'Entry not found' });
+    }
 });
 
 
