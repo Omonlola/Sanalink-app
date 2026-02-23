@@ -31,17 +31,25 @@ export function Navbar() {
                         {user ? (
                             <div className="flex items-center gap-4">
                                 <span className="text-sm font-medium text-slate-800">
-                                    {user.name} ({user.type === 'psychologist' ? 'Psy' : 'Patient'})
+                                    {user.name} ({user.type === 'admin' ? 'Admin' : user.type === 'psychologist' ? 'Psy' : 'Patient'})
                                 </span>
-                                <Link to="/dashboard">
-                                    <Button variant="outline" className="py-1.5 text-sm">Tableau de bord</Button>
-                                </Link>
-                                <Link to="/profile">
-                                    <Button variant="ghost" className="py-1.5 text-sm">Mon Profil</Button>
-                                </Link>
-                                <Link to="/journal">
-                                    <Button variant="ghost" className="py-1.5 text-sm">Journal</Button>
-                                </Link>
+                                {user.type === 'admin' ? (
+                                    <Link to="/admin">
+                                        <Button variant="outline" className="py-1.5 text-sm">Panel Admin</Button>
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link to="/dashboard">
+                                            <Button variant="outline" className="py-1.5 text-sm">Tableau de bord</Button>
+                                        </Link>
+                                        <Link to="/profile">
+                                            <Button variant="ghost" className="py-1.5 text-sm">Mon Profil</Button>
+                                        </Link>
+                                        <Link to="/journal">
+                                            <Button variant="ghost" className="py-1.5 text-sm">Journal</Button>
+                                        </Link>
+                                    </>
+                                )}
                                 <Button variant="ghost" onClick={handleLogout} className="py-1.5 text-sm">Déconnexion</Button>
                             </div>
                         ) : (

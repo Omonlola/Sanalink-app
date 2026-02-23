@@ -15,8 +15,8 @@ export function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password);
-            navigate('/dashboard');
+            const userData = await login(email, password);
+            navigate(userData.type === 'admin' ? '/admin' : '/dashboard');
         } catch (err) {
             setError('Email ou mot de passe incorrect.');
         }
