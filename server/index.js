@@ -115,6 +115,103 @@ const getPsychStats = (psychId) => {
     return { totalConsultations: apts.length, completedConsultations: completed.length, revenue };
 };
 
+// Helper to calculate PMF Stats (Cohort Analysis)
+const calculatePMFStats = () => {
+    const cohorts = {}; // Key: "YYYY-Wxx", Value: { weekLabel, users: [] }
+
+    // Helper to get ISO Week
+    const getWeekNumber = (d) => {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return [d.getUTCFullYear(), weekNo];
+    };
+
+    // 1. Group users by registration week
+    users.filter(u => u.type === 'user').forEach(user => {
+        const regDate = new Date(user.createdAt);
+        const [year, weekNo] = getWeekNumber(regDate);
+        const cohortKey = `${year}-W${String(weekNo).padStart(2, '0')}`;
+
+        if (!cohorts[cohortKey]) {
+            // Get Monday of that week for label
+            const d = new Date(regDate);
+            const day = d.getDay() || 7;
+            d.setHours(-24 * (day - 1));
+
+            cohorts[cohortKey] = {
+                weekLabel: `Semaine ${weekNo} (${d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })})`,
+                acquired: 0,
+                users: []
+            };
+        }
+        cohorts[cohortKey].acquired++;
+        cohorts[cohortKey].users.push(user.id);
+    });
+
+    const cohortList = Object.keys(cohorts).sort().map(key => cohorts[key]);
+
+    // 2. For each cohort, calculate the PMF achievement over 30 days
+    const result = cohortList.map(cohort => {
+        const stats = {
+            label: cohort.weekLabel,
+            acquired: cohort.acquired,
+            retention: Array(30).fill(0)
+        };
+
+        // For each user in the cohort, check when they achieved PMF (7-day streak)
+        cohort.users.forEach(userId => {
+            const userObj = users.find(u => u.id === userId);
+            const userJournals = journals
+                .filter(j => j.userId === userId)
+                .map(j => new Date(j.date).toDateString());
+
+            const uniqueDates = [...new Set(userJournals)].sort((a, b) => new Date(a) - new Date(b));
+
+            let pmfDay = -1;
+
+            if (uniqueDates.length >= 7) {
+                let currentStreak = 1;
+                for (let i = 1; i < uniqueDates.length; i++) {
+                    const prev = new Date(uniqueDates[i - 1]);
+                    const curr = new Date(uniqueDates[i]);
+                    const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        currentStreak++;
+                        if (currentStreak >= 7) {
+                            const achievementDate = curr;
+                            const regDate = new Date(userObj.createdAt);
+                            const diffMs = achievementDate - regDate;
+                            pmfDay = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                            break;
+                        }
+                    } else {
+                        currentStreak = 1;
+                    }
+                }
+            }
+
+            if (pmfDay !== -1 && pmfDay < 30) {
+                // User achieved PMF on Day X, so they are "retained" from Day X to Day 30
+                for (let d = Math.max(0, pmfDay); d < 30; d++) {
+                    stats.retention[d]++;
+                }
+            }
+        });
+
+        // Convert to percentages
+        stats.retention = stats.retention.map(count =>
+            stats.acquired > 0 ? Math.round((count / stats.acquired) * 100) : 0
+        );
+
+        return stats;
+    });
+
+    return result;
+};
+
 // --- Auth Routes ---
 app.post('/api/auth/register', (req, res) => {
     const { email, password, name, type } = req.body;
@@ -343,6 +440,17 @@ app.get('/api/admin/stats', (req, res) => {
         conversionRate,
         weeklyConsultations: weeklyData
     });
+});
+
+// GET /api/admin/pmf-stats — Cohort Analysis PMF
+app.get('/api/admin/pmf-stats', (req, res) => {
+    try {
+        const pmfStats = calculatePMFStats();
+        res.json(pmfStats);
+    } catch (error) {
+        console.error('Error calculating PMF stats:', error);
+        res.status(500).json({ message: 'Error calculating PMF stats' });
+    }
 });
 
 // GET /api/admin/users — All patients

@@ -6,6 +6,7 @@ import {
     Users, UserCheck, Calendar, DollarSign,
     TrendingUp, AlertCircle, Clock, CheckCircle
 } from 'lucide-react';
+import { PMFTracker } from '../../components/admin/PMFTracker';
 
 export function AdminDashboard() {
     const { api } = useAuth();
@@ -60,6 +61,8 @@ export function AdminDashboard() {
                             ))}
                         </div>
                     </div>
+
+                    <PMFTracker />
 
                     {/* Quick summary */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
