@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { Calendar, Video, MapPin, User, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, Video, MapPin, User, Clock, CheckCircle, Wind, Bot } from 'lucide-react';
 
 export function Dashboard() {
     const { user, api } = useAuth();
@@ -125,17 +125,57 @@ export function Dashboard() {
                                         </div>
                                         {app.type === 'remote' && (
                                             <div className="mt-2 text-sm bg-slate-50 p-2 rounded border border-slate-200">
-                                                <p className="font-medium text-slate-700">Lien de la réunion :</p>
-                                                <a href={app.link} target="_blank" rel="noreferrer" className="text-brand-600 underline truncate block">
-                                                    {app.link}
-                                                </a>
-                                                <p className="text-xs text-slate-500 mt-1">(Envoyé par agnesvdogo@gmail.com)</p>
+                                                <p className="font-medium text-slate-700">Salle virtuelle :</p>
+                                                <Link to={app.link} className="text-brand-600 font-bold hover:underline truncate block flex items-center gap-2 mt-1">
+                                                    <Video className="w-4 h-4" />
+                                                    Rejoindre la consultation
+                                                </Link>
+                                                <p className="text-xs text-slate-500 mt-1">Sanalink Secure Video</p>
                                             </div>
                                         )}
                                     </Card>
                                 ))}
                             </div>
                         )}
+                    </section>
+
+                    {/* Quick Access Section */}
+                    <section>
+                        <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-brand-500" />
+                            Accès Rapide
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Link to="/journal" className="group">
+                                <Card className="p-6 h-full border-2 border-transparent hover:border-indigo-100 transition-all hover:shadow-md">
+                                    <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Bot className="w-6 h-6 text-indigo-600" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 mb-1">Journal IA</h3>
+                                    <p className="text-sm text-slate-500 italic">"The Best Friend"</p>
+                                </Card>
+                            </Link>
+
+                            <Link to="/relaxation" className="group">
+                                <Card className="p-6 h-full border-2 border-transparent hover:border-teal-100 transition-all hover:shadow-md">
+                                    <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Wind className="w-6 h-6 text-teal-600" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 mb-1">Espace Détente</h3>
+                                    <p className="text-sm text-slate-500 italic">Respiration & Fun</p>
+                                </Card>
+                            </Link>
+
+                            <Link to="/psychologists" className="group">
+                                <Card className="p-6 h-full border-2 border-transparent hover:border-amber-100 transition-all hover:shadow-md">
+                                    <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <User className="w-6 h-6 text-amber-600" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 mb-1">Spécialistes</h3>
+                                    <p className="text-sm text-slate-500 italic">Prendre rendez-vous</p>
+                                </Card>
+                            </Link>
+                        </div>
                     </section>
 
                     {/* Section Catalog */}
@@ -181,9 +221,12 @@ export function Dashboard() {
                                             </div>
                                             <div className="flex gap-2">
                                                 {app.type === 'remote' && (
-                                                    <Button size="sm" onClick={() => window.open(app.link, '_blank')}>
-                                                        Rejoindre Meet
-                                                    </Button>
+                                                    <Link to={app.link}>
+                                                        <Button size="sm" className="flex items-center gap-2">
+                                                            <Video className="w-4 h-4" />
+                                                            Ouvrir la salle
+                                                        </Button>
+                                                    </Link>
                                                 )}
                                             </div>
                                         </div>

@@ -19,17 +19,18 @@ const users = [
 ]; // additional registered users will be pushed here
 
 const appointments = [
-    { id: 'apt-1', userId: 'user-1', doctorId: 'psy-1', date: '2026-01-12', time: '09:00', type: 'remote', status: 'completed', link: 'https://meet.google.com/abc', paymentStatus: 'paid', amount: 80 },
+    { id: 'apt-1', userId: 'user-1', doctorId: 'psy-1', date: '2026-01-12', time: '09:00', type: 'remote', status: 'completed', link: '/consultation/apt-1', paymentStatus: 'paid', amount: 80 },
     { id: 'apt-2', userId: 'user-2', doctorId: 'psy-2', date: '2026-01-18', time: '11:00', type: 'presentiel', status: 'completed', link: null, paymentStatus: 'paid', amount: 90 },
-    { id: 'apt-3', userId: 'user-3', doctorId: 'psy-1', date: '2026-01-22', time: '14:00', type: 'remote', status: 'cancelled', link: 'https://meet.google.com/def', paymentStatus: 'refunded', amount: 80 },
-    { id: 'apt-4', userId: 'user-4', doctorId: 'psy-3', date: '2026-02-03', time: '08:00', type: 'remote', status: 'completed', link: 'https://meet.google.com/ghi', paymentStatus: 'paid', amount: 100 },
-    { id: 'apt-5', userId: 'user-1', doctorId: 'psy-1', date: '2026-02-10', time: '10:00', type: 'remote', status: 'completed', link: 'https://meet.google.com/jkl', paymentStatus: 'paid', amount: 80 },
+    { id: 'apt-3', userId: 'user-3', doctorId: 'psy-1', date: '2026-01-22', time: '14:00', type: 'remote', status: 'cancelled', link: '/consultation/apt-3', paymentStatus: 'refunded', amount: 80 },
+    { id: 'apt-4', userId: 'user-4', doctorId: 'psy-3', date: '2026-02-03', time: '08:00', type: 'remote', status: 'completed', link: '/consultation/apt-4', paymentStatus: 'paid', amount: 100 },
+    { id: 'apt-5', userId: 'user-1', doctorId: 'psy-1', date: '2026-02-10', time: '10:00', type: 'remote', status: 'completed', link: '/consultation/apt-5', paymentStatus: 'paid', amount: 80 },
     { id: 'apt-6', userId: 'user-6', doctorId: 'psy-2', date: '2026-02-12', time: '16:00', type: 'presentiel', status: 'completed', link: null, paymentStatus: 'paid', amount: 90 },
-    { id: 'apt-7', userId: 'user-7', doctorId: 'psy-3', date: '2026-02-15', time: '12:00', type: 'remote', status: 'upcoming', link: 'https://meet.google.com/mno', paymentStatus: 'pending', amount: 100 },
-    { id: 'apt-8', userId: 'user-2', doctorId: 'psy-1', date: '2026-02-20', time: '09:00', type: 'remote', status: 'upcoming', link: 'https://meet.google.com/pqr', paymentStatus: 'pending', amount: 80 },
+    { id: 'apt-7', userId: 'user-7', doctorId: 'psy-3', date: '2026-02-15', time: '12:00', type: 'remote', status: 'upcoming', link: '/consultation/apt-7', paymentStatus: 'pending', amount: 100 },
+    { id: 'apt-8', userId: 'user-2', doctorId: 'psy-1', date: '2026-02-20', time: '09:00', type: 'remote', status: 'upcoming', link: '/consultation/apt-8', paymentStatus: 'pending', amount: 80 },
     { id: 'apt-9', userId: 'user-4', doctorId: 'psy-2', date: '2026-02-22', time: '13:00', type: 'presentiel', status: 'upcoming', link: null, paymentStatus: 'pending', amount: 90 },
-    { id: 'apt-10', userId: 'user-5', doctorId: 'psy-3', date: '2026-01-30', time: '17:00', type: 'remote', status: 'cancelled', link: 'https://meet.google.com/stu', paymentStatus: 'refunded', amount: 100 },
+    { id: 'apt-10', userId: 'user-5', doctorId: 'psy-3', date: '2026-01-30', time: '17:00', type: 'remote', status: 'cancelled', link: '/consultation/apt-10', paymentStatus: 'refunded', amount: 100 },
 ];
+
 
 const evaluations = [];
 const journals = []; // { id, userId, content, date, mood }
@@ -40,60 +41,7 @@ const communications = [
 ];
 
 // Mock Psychologists
-const psychologists = [
-    {
-        id: 'psy-1',
-        name: 'Dr. Jean Dupont',
-        specialty: 'Psychologie Clinique',
-        description: "Expert en gestion du stress et anxiété. 15 ans d'expérience.",
-        image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200',
-        availableSlots: ['09:00', '10:00', '14:00', '15:00'],
-        email: 'jean.dupont@sanalink.com',
-        status: 'validated',
-        rating: 4.8,
-        consultationsCount: 0,
-        createdAt: '2025-12-01T10:00:00Z'
-    },
-    {
-        id: 'psy-2',
-        name: 'Mme. Sarah Cohen',
-        specialty: 'Thérapie de couple',
-        description: 'Accompagnement bienveillant pour les couples et les familles.',
-        image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200',
-        availableSlots: ['11:00', '13:00', '16:00'],
-        email: 'sarah.cohen@sanalink.com',
-        status: 'validated',
-        rating: 4.6,
-        consultationsCount: 0,
-        createdAt: '2025-12-05T10:00:00Z'
-    },
-    {
-        id: 'psy-3',
-        name: 'Dr. Marc Levy',
-        specialty: 'Pédopsychiatrie',
-        description: "Spécialisé dans les troubles de l'attention chez l'enfant.",
-        image: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200',
-        availableSlots: ['08:00', '12:00', '17:00'],
-        email: 'marc.levy@sanalink.com',
-        status: 'pending',
-        rating: 4.9,
-        consultationsCount: 0,
-        createdAt: '2026-01-15T10:00:00Z'
-    },
-    {
-        id: 'psy-4',
-        name: 'Dr. Amina Touré',
-        specialty: 'TCC (Thérapie Cognitivo-Comportementale)',
-        description: 'Spécialisée dans les phobies et troubles obsessionnels compulsifs.',
-        image: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200',
-        availableSlots: ['10:00', '14:00', '15:00'],
-        email: 'amina.toure@sanalink.com',
-        status: 'suspended',
-        rating: 4.3,
-        consultationsCount: 0,
-        createdAt: '2026-02-01T10:00:00Z'
-    }
-];
+const psychologists = [];
 
 // Admin account
 const adminAccount = {
@@ -288,13 +236,15 @@ app.get('/api/psychologists', (req, res) => {
 app.post('/api/appointments', (req, res) => {
     const { userId, doctorId, date, time, type } = req.body;
 
+    const appId = Date.now().toString();
+
     let link = null;
     if (type === 'remote') {
-        link = `https://meet.google.com/new-meeting`;
+        link = `/consultation/apt-${appId}`;
     }
 
     const newAppointment = {
-        id: Date.now().toString(),
+        id: appId,
         userId,
         doctorId,
         date,
@@ -386,6 +336,43 @@ app.delete('/api/journals/:id', (req, res) => {
         res.status(404).json({ message: 'Entry not found' });
     }
 });
+
+// --- Notes Routes (Psychologists) ---
+const notes = [];
+
+app.get('/api/notes/:psyId', (req, res) => {
+    const { psyId } = req.params;
+    const psyNotes = notes.filter(n => n.psyId === psyId).sort((a, b) => new Date(b.date) - new Date(a.date));
+    res.json(psyNotes);
+});
+
+app.post('/api/notes', (req, res) => {
+    const { psyId, patientName, content } = req.body;
+    if (!content || !patientName) {
+        return res.status(400).json({ message: 'Patient name and content are required' });
+    }
+    const newNote = {
+        id: Date.now().toString(),
+        psyId,
+        patientName,
+        content,
+        date: new Date().toISOString()
+    };
+    notes.push(newNote);
+    res.status(201).json(newNote);
+});
+
+app.delete('/api/notes/:id', (req, res) => {
+    const { id } = req.params;
+    const index = notes.findIndex(n => n.id === id);
+    if (index !== -1) {
+        notes.splice(index, 1);
+        res.status(204).send();
+    } else {
+        res.status(404).json({ message: 'Note not found' });
+    }
+});
+
 
 // ================================================
 // --- ADMIN / CRM ROUTES ---
