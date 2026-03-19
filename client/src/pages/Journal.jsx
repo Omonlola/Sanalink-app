@@ -21,7 +21,8 @@ export function Journal() {
     // Fetch entries
     useEffect(() => {
         if (user?.id) {
-            fetch(`http://localhost:3000/api/journals/${user.id}`)
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            fetch(`${baseUrl}/api/journals/${user.id}`)
                 .then(res => res.json())
                 .then(data => {
                     setEntries(data);
@@ -39,7 +40,8 @@ export function Journal() {
 
         setSubmitting(true);
         try {
-            const res = await fetch('http://localhost:3000/api/journals', {
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const res = await fetch(`${baseUrl}/api/journals`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -66,7 +68,8 @@ export function Journal() {
         if (!window.confirm('Voulez-vous vraiment supprimer cette entrée ?')) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/api/journals/${id}`, {
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const res = await fetch(`${baseUrl}/api/journals/${id}`, {
                 method: 'DELETE'
             });
 
