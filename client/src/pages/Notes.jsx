@@ -12,7 +12,8 @@ export function Notes() {
 
     useEffect(() => {
         if (user?.id) {
-            fetch(`http://localhost:3000/api/notes/${user.id}`)
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            fetch(`${baseUrl}/api/notes/${user.id}`)
                 .then(res => res.json())
                 .then(data => {
                     setNotes(data);
@@ -30,7 +31,8 @@ export function Notes() {
 
         setSubmitting(true);
         try {
-            const res = await fetch('http://localhost:3000/api/notes', {
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const res = await fetch(`${baseUrl}/api/notes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -57,7 +59,8 @@ export function Notes() {
         if (!window.confirm('Voulez-vous vraiment supprimer cette note ?')) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/api/notes/${id}`, {
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const res = await fetch(`${baseUrl}/api/notes/${id}`, {
                 method: 'DELETE'
             });
 
