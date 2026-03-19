@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  password        String
+  name            String
+  type            String   // 'user', 'psychologist', 'admin'
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  
+  // User specifics
+  age             Int?
+  profession      String?
+  reason          String?
+  emotionalState  String?
+  
+  // Psychologist specifics
+  specialty       String?
+  description     String?
+  image           String?
+  availableSlots  String[]
+  rating          Float?
+  consultationsCount Int? @default(0)
+
+  // Relations
+  patientAppointments Appointment[] @relation("PatientAppointments")
+  doctorAppointments  Appointment[] @relation("DoctorAppointments")
+  journals            Journal[]
+  patientEvaluations  Evaluation[]  @relation("PatientEvaluations")
+  doctorEvaluations   Evaluation[]  @relation("DoctorEvaluations")
+  psyNotes            Note[]
+}
+
+model Appointment {
+  id            String   @id @default(uuid())
+  userId        String
+  doctorId      String
+  date          String
+  time          String
+  type          String
+  status        String   @default("upcoming")
+  link          String?
+  paymentStatus String   @default("pending")
+  amount        Int      @default(80)
+
+  user          User     @relation("PatientAppointments", fields: [userId], references: [id])
+  doctor        User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
+}
+
+model Journal {
+  id      String   @id @default(uuid())
+  userId  String
+  content String
+  mood    String
+  date    DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id])
+}
+
+model Note {
+  id          String   @id @default(uuid())
+  psyId       String
+  patientName String
+  content     String
+  date        DateTime @default(now())
+
+  psychologist User    @relation(fields: [psyId], references: [id])
+}
+
+model Evaluation {
+  id       String   @id @default(uuid())
+  userId   String
+  doctorId String
+  content  String
+  date     DateTime @default(now())
+
+  patient      User @relation("PatientEvaluations", fields: [userId], references: [id])
+  psychologist User @relation("DoctorEvaluations", fields: [doctorId], references: [id])
+}
+
+model Communication {
+  id      String   @id @default(uuid())
+  sender  String   // 'admin'
+  to      String   // 'all', 'psychologists'
+  subject String
+  message String
+  type    String   // 'notification', 'email'
+  sentAt  DateTime @default(now())
+}
