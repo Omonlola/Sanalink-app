@@ -38,8 +38,12 @@ app.post('/api/auth/register', async (req, res) => {
         const { password: _, ...userWithoutPass } = newUser;
         res.status(201).json(userWithoutPass);
     } catch (error) {
-        console.error('Register Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Register Error Details:', error);
+        res.status(500).json({
+            message: 'Server error during registration',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
@@ -63,8 +67,12 @@ app.post('/api/auth/login', async (req, res) => {
         const { password: _, ...userWithoutPass } = user;
         res.json(userWithoutPass);
     } catch (error) {
-        console.error('Login Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Login Error Details:', error);
+        res.status(500).json({
+            message: 'Server error during login',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
