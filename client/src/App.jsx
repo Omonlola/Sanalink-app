@@ -7,6 +7,10 @@ import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Profile } from './pages/Profile';
 import { Journal } from './pages/Journal';
+import { Notes } from './pages/Notes';
+import { ConsultationRoom } from './pages/ConsultationRoom';
+import Psychologists from './pages/Psychologists';
+import Relaxation from './pages/Relaxation';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UsersManagement } from './pages/admin/UsersManagement';
 import { PsychologistsManagement } from './pages/admin/PsychologistsManagement';
@@ -60,6 +64,22 @@ function App() {
                                 </PrivateRoute>
                             }
                         />
+                        <Route
+                            path="/psychologists"
+                            element={
+                                <PrivateRoute>
+                                    <Psychologists />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/relaxation"
+                            element={
+                                <PrivateRoute>
+                                    <Relaxation />
+                                </PrivateRoute>
+                            }
+                        />
                         {/* Admin Routes */}
                         <Route
                             path="/admin"
@@ -107,6 +127,24 @@ function App() {
                                 <AdminRoute>
                                     <CommunicationCenter />
                                 </AdminRoute>
+                            }
+                        />
+                        {/* Psychologist Routes */}
+                        <Route
+                            path="/notes"
+                            element={
+                                <PrivateRoute>
+                                    <Notes />
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Video Consultation Route */}
+                        <Route
+                            path="/consultation/:roomId"
+                            element={
+                                <PrivateRoute>
+                                    <ConsultationRoom />
+                                </PrivateRoute>
                             }
                         />
                         {/* Fallback */}

@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Plus, Calendar } from 'lucide-react';
+import { Trash2, Plus, Calendar, SmilePlus, Smile, Meh, Frown, CloudRain, Bot } from 'lucide-react';
+
+const MOODS = [
+    { label: 'Génial', icon: SmilePlus, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'Bien', icon: Smile, color: 'text-green-500', bg: 'bg-green-50' },
+    { label: 'Moyen', icon: Meh, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { label: 'Difficile', icon: Frown, color: 'text-orange-500', bg: 'bg-orange-50' },
+    { label: 'Mauvais', icon: CloudRain, color: 'text-rose-500', bg: 'bg-rose-50' },
+];
 
 export function Journal() {
     const { user } = useAuth();
     const [entries, setEntries] = useState([]);
     const [newEntry, setNewEntry] = useState('');
+    const [selectedMood, setSelectedMood] = useState('Moyen');
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -36,7 +45,7 @@ export function Journal() {
                 body: JSON.stringify({
                     userId: user.id,
                     content: newEntry,
-                    mood: 'neutral' // Could add mood selector later
+                    mood: selectedMood
                 })
             });
 
@@ -44,6 +53,7 @@ export function Journal() {
                 const savedEntry = await res.json();
                 setEntries([savedEntry, ...entries]);
                 setNewEntry('');
+                setSelectedMood('Moyen');
             }
         } catch (err) {
             console.error('Failed to save entry', err);
@@ -68,71 +78,128 @@ export function Journal() {
         }
     };
 
+    const getAIFeedback = (mood) => {
+        switch (mood) {
+            case 'Génial':
+            case 'Heureux': // Legacy support
+                return "C'est formidable ! Gardez cette belle énergie et n'hésitez pas à noter ce qui a rendu cette journée si spéciale.";
+            case 'Bien':
+                return "Une bonne journée en perspective. Profitez de ce sentiment positif pour avancer sur vos projets ou vous détendre.";
+            case 'Moyen':
+            case 'Neutre': // Legacy support
+                return "Prenez toujours le temps de vous recentrer sur vous-même. Chaque jour a son propre rythme.";
+            case 'Difficile':
+            case 'Triste': // Legacy support
+                return "Je suis là pour vous. C'est tout à fait humain de ressentir cela. Pensez à l'Espace Détente pour souffler un peu.";
+            case 'Mauvais':
+                return "Cela semble être une période particulièrement rude. Vous n'êtes pas seul et en parler à un psychologue pourrait vous soulager.";
+            default:
+                return "C'est merveilleux que vous preniez ce temps pour vous. Chaque réflexion vous rapproche de vous-même.";
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-slate-500">Chargement de votre journal...</div>;
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-            <div className="space-y-4">
-                <h1 className="text-3xl font-bold text-slate-900">Mon Journal Intime</h1>
-                <p className="text-slate-600">Un espace sécurisé pour vos pensées et vos réflexions.</p>
+            <div className="space-y-4 text-center md:text-left">
+                <h1 className="text-3xl font-bold text-slate-900">Journal Intelligent (The Best Friend)</h1>
+                <p className="text-slate-600">Partagez vos pensées et recevez un retour bienveillant de votre IA.</p>
             </div>
 
             {/* New Entry Input */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 space-y-4">
-                <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-brand-500" />
-                    Nouvelle entrée
-                </h2>
-                <textarea
-                    className="w-full h-32 p-4 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none transition-all"
-                    placeholder="Comment vous sentez-vous aujourd'hui ?"
-                    value={newEntry}
-                    onChange={(e) => setNewEntry(e.target.value)}
-                />
-                <div className="flex justify-end">
-                    <button
-                        onClick={handleSave}
-                        disabled={submitting || !newEntry.trim()}
-                        className="bg-brand-600 text-white px-6 py-2 rounded-lg hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                        {submitting ? 'Sauvegarde...' : 'Enregistrer'}
-                    </button>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        Comment vous sentez-vous ?
+                    </h2>
+                    <div className="flex flex-wrap gap-2 md:gap-4">
+                        {MOODS.map((m) => {
+                            const Icon = m.icon;
+                            return (
+                                <button
+                                    key={m.label}
+                                    onClick={() => setSelectedMood(m.label)}
+                                    className={`flex-1 min-w-[60px] flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${selectedMood === m.label
+                                        ? `border-indigo-500 ${m.bg} ${m.color}`
+                                        : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                        }`}
+                                >
+                                    <Icon className="w-6 h-6" />
+                                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-tight truncate w-full text-center">{m.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <textarea
+                        className="w-full h-40 p-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-all placeholder:text-slate-300"
+                        placeholder="Qu'avez-vous sur le cœur aujourd'hui ?"
+                        value={newEntry}
+                        onChange={(e) => setNewEntry(e.target.value)}
+                    />
+                    <div className="flex justify-end">
+                        <button
+                            onClick={handleSave}
+                            disabled={submitting || !newEntry.trim()}
+                            className="bg-indigo-600 text-white px-8 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center gap-2"
+                        >
+                            <Plus className="w-5 h-5" />
+                            {submitting ? 'Envoi...' : 'Enregistrer & Parler à IA'}
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* Entries List */}
             <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-slate-800">Historique</h2>
+                <h2 className="text-xl font-bold text-slate-800 px-2">Mon Historique</h2>
                 {entries.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500">
-                        Votre journal est vide. Commencez par écrire quelque chose aujourd'hui !
+                    <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-slate-400">
+                        Votre journal est encore vierge. Laissez votre première trace ici.
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {entries.map(entry => (
-                            <div key={entry.id} className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 group hover:shadow-md transition-shadow">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                                        <Calendar className="w-4 h-4" />
-                                        {new Date(entry.date).toLocaleDateString('fr-FR', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                            <div key={entry.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow">
+                                <div className="p-6 space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 rounded-lg bg-slate-50 text-indigo-500`}>
+                                                <Calendar className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-bold text-slate-900 capitalize">
+                                                    {new Date(entry.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                                </div>
+                                                <div className="text-xs text-slate-400 font-medium">
+                                                    Humeur: <span className="text-indigo-600">{entry.mood || 'Neutre'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDelete(entry.id)}
+                                            className="text-slate-300 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleDelete(entry.id)}
-                                        className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
-                                        title="Supprimer"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <div className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                        {entry.content}
+                                    </div>
                                 </div>
-                                <div className="prose prose-slate max-w-none text-slate-700 whitespace-pre-wrap">
-                                    {entry.content}
+                                <div className="bg-indigo-50/50 p-4 border-t border-indigo-50 flex gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                        <Bot className="w-6 h-6 text-indigo-600" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-bold text-indigo-900 uppercase tracking-wider">Note de l'IA</p>
+                                        <p className="text-sm text-indigo-800 italic leading-relaxed">
+                                            {getAIFeedback(entry.mood)}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ))}

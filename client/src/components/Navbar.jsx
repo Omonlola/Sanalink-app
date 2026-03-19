@@ -27,6 +27,16 @@ export function Navbar() {
 
                     <div className="hidden md:flex items-center gap-6">
                         <Link to="/" className="text-slate-600 hover:text-brand-600 font-medium">Accueil</Link>
+                        {(!user || user.type === 'user') && (
+                            <>
+                                <Link to="/journal" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Journal</Link>
+                                <Link to="/psychologists" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Psychologues</Link>
+                                <Link to="/relaxation" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Détente</Link>
+                            </>
+                        )}
+                        {user?.type === 'psychologist' && (
+                            <Link to="/notes" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Notes de Consultation</Link>
+                        )}
 
                         {user ? (
                             <div className="flex items-center gap-4">
@@ -37,7 +47,7 @@ export function Navbar() {
                                     <Link to="/admin">
                                         <Button variant="outline" className="py-1.5 text-sm">Panel Admin</Button>
                                     </Link>
-                                ) : (
+                                ) : user.type === 'psychologist' ? (
                                     <>
                                         <Link to="/dashboard">
                                             <Button variant="outline" className="py-1.5 text-sm">Tableau de bord</Button>
@@ -45,8 +55,17 @@ export function Navbar() {
                                         <Link to="/profile">
                                             <Button variant="ghost" className="py-1.5 text-sm">Mon Profil</Button>
                                         </Link>
-                                        <Link to="/journal">
-                                            <Button variant="ghost" className="py-1.5 text-sm">Journal</Button>
+                                        <Link to="/notes">
+                                            <Button variant="ghost" className="py-1.5 text-sm">Mes Notes</Button>
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link to="/dashboard">
+                                            <Button variant="outline" className="py-1.5 text-sm">Tableau de bord</Button>
+                                        </Link>
+                                        <Link to="/profile">
+                                            <Button variant="ghost" className="py-1.5 text-sm">Mon Profil</Button>
                                         </Link>
                                     </>
                                 )}
