@@ -1,0 +1,43 @@
+﻿,,,,
+,,,,
+,,,,
+,,,,
+,Bloc 1,"Résultats de bloc 1
+EIP
+International - promo 2026","Résultats de bloc 1
+EIP
+International - promo 2026",
+,,,,
+,,,,
+,,,,
+,,,,
+,Grille de compétences,,,
+,,,,
+,,,,
+A1. Identification du besoin client,A1. Identification du besoin client,A1. Identification du besoin client,A1. Identification du besoin client,A1. Identification du besoin client
+,,,,
+,Compétence à valider,Titre de l'observable,Description,
+,"C1 - Recenser les besoins du client et des utilisateurs en observant et en échangeant avec les parties prenantes afin de cerner 
+les usages prévus, notamment pour les personnes en situation de handicap.",Analyse des besoins clients,Le candidat présente une analyse des besoins clients ainsi que les échanges ayant permis son élaboration et couvrant l'intégralité du scope fonctionne,
+,,,Les besoins identifiés tiennent compte des normes en vigueur concernant les usages des personnes en situation de handicap,
+,"C2 - Réaliser un audit technique, fonctionnel et de sécurité de l'environnement dans lequel s'inscrit le projet (infrastructure, 
+système d'information, ressources humaines, ...) afin de proposer les solutions les plus adaptées au contexte, en analysant les 
+solutions déjà en place et leurs effets.",Compte-rendu d'audit,"Le dossier du candidat contient un compte-rendu d'audit technique, fonctionnel et de sécurité de l'environnement d'éxécution du projet mettant en lumière les contraintes et opportunités du contexte opérationnel",
+,,Compte-rendu de l'audit - approche méthodologique,"Le candidat est en mesure d'expliquer l'approche méthodologique mise en oeuvre pour réaliser l'audit : moyens d'investigation, collecte de retours utilisateurs, ...",
+,,,,
+A2. Traduction technique du besoin fonctionnel,A2. Traduction technique du besoin fonctionnel,A2. Traduction technique du besoin fonctionnel,A2. Traduction technique du besoin fonctionnel,A2. Traduction technique du besoin fonctionnel
+,,,,
+,Compétence à valider,Titre de l'observable,Description,
+,"C3 - Rédiger les spécifications techniques et fonctionnelles à partir des résultats de l'audit, afin de couvrir tous les besoins 
+clients, en décrivant précisément tous les aspects techniques (spécifications techniques) et humains (spécifications 
+fonctionnelles) ",Documentation des spécifications,Le dossier du candidat présente un corpus de documentations des spécifications techniques et fonctionnelles définissant le périmètre du projet considérant les contraintes identifiées durant l'audit,
+,,Spécifications - accessibilité,Les spécifications techniques et fonctionnelles présentées par le candidats prennent en considération les problématiques d'accessibilité numérique des personnes en situation de handicap,
+,,Documentation des spécificités - accessibilité, Les documents présents dans le dossier du candidat respectent les recommandations techniques permettant l'accessilité aux personnes en situation de handicap,
+,"C4 - Chiffrer le projet en calculant les éléments financiers de la solution technique et en réalisant un benchmark des solutions 
+existantes afin de cadrer les prévisions budgétaires.",Analyse financière,Le dossier du candidat comporte une analyse financière des coûts de production et d'exploitation de la solution proposée en cherchant à optimiser les coûts et ressources au regard du budget transmis par le client,
+,,Analyse financière - benchmarks,Le chiffrage du projet présente différents scénarii en s'appuyant sur les benchmarks réalisés,
+,"C5 - Prévoir les impacts techniques et fonctionnels de la solution préconisée, afin de sécuriser des pistes de mitigation le cas 
+échéant, en s'assurant de sa bonne intégration dans l'environnement d'exploitation du client.",Etude prospective,Le dossier du candidat comporte une étude prospective des voies d'évolution et de migration en s'appuyant sur l'audit technique réalisé,
+,,Etude prospective - vulgarisation,8j,
+,,,,
+,Powered by Eduxim,Powered by Eduxim,Powered by Eduxim,Powered by Eduxim
